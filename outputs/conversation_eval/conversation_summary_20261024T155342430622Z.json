@@ -1,0 +1,90 @@
+{
+  "evaluation_mode": "offline_deterministic_fixture",
+  "live_llm_or_tool_calls": false,
+  "turn_count": 96,
+  "conversation_count": 23,
+  "overall_pass_rate": 0.0,
+  "decision_accuracy": 0.5520833333333334,
+  "required_fact_compliance": 0.6707317073170732,
+  "required_fact_denominator": 82,
+  "forbidden_fact_violation_rate": 0.0,
+  "forbidden_fact_denominator": 32,
+  "evidence_support_rate": 0.0,
+  "evidence_applicable_turns": 96,
+  "evidence_match_semantics": "Identifier overlap only; not a semantic support judgment.",
+  "exact_tool_call_accuracy": 0.96875,
+  "tool_call_precision": 1.0,
+  "tool_call_recall": 0.9444444444444444,
+  "tool_precision_recall_basis": "Tool-name multiset counts; exact per-turn match also checks expected safe arguments.",
+  "expected_tool_call_count": 54,
+  "actual_tool_call_count": 51,
+  "privacy_violation_count": 0,
+  "scenario_breakdown": {
+    "high_value_damage": {
+      "turns": 4,
+      "passed": 0
+    },
+    "return_eligibility": {
+      "turns": 10,
+      "passed": 0
+    },
+    "human_requested": {
+      "turns": 8,
+      "passed": 0
+    },
+    "repeat_contact": {
+      "turns": 8,
+      "passed": 0
+    },
+    "refund_status": {
+      "turns": 8,
+      "passed": 0
+    },
+    "where_is_my_order": {
+      "turns": 8,
+      "passed": 0
+    },
+    "topic_switch": {
+      "turns": 10,
+      "passed": 0
+    },
+    "compensation_demand": {
+      "turns": 8,
+      "passed": 0
+    },
+    "cancel_unshipped_order": {
+      "turns": 8,
+      "passed": 0
+    },
+    "cancel_shipped_order": {
+      "turns": 8,
+      "passed": 0
+    },
+    "failed_verification": {
+      "turns": 8,
+      "passed": 0
+    },
+    "express_late_credit": {
+      "turns": 8,
+      "passed": 0
+    }
+  },
+  "expected_decision_breakdown": {
+    "clarify": {
+      "turns": 48,
+      "passed": 0
+    },
+    "answer": {
+      "turns": 36,
+      "passed": 0
+    },
+    "escalate": {
+      "turns": 6,
+      "passed": 0
+    },
+    "refuse": {
+      "turns": 6,
+      "passed": 0
+    }
+  }
+}

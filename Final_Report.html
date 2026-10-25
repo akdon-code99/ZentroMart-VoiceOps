@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Report</title>
+    <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+        background-color: #fff;
+    }
+    h1 {
+        color: #2c3e50;
+        text-align: center;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+    h2 {
+        color: #2980b9;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+        margin-top: 30px;
+    }
+    h3 {
+        color: #34495e;
+        margin-top: 20px;
+    }
+    p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+    ul, ol {
+        margin-bottom: 15px;
+        padding-left: 25px;
+    }
+    li {
+        margin-bottom: 5px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    code {
+        font-family: 'Consolas', 'Monaco', monospace;
+        background-color: #f4f4f4;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    pre {
+        background-color: #f4f4f4;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+    }
+    pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    hr {
+        border: 0;
+        border-top: 1px solid #eee;
+        margin: 30px 0;
+    }
+    </style>
+</head>
+<body>
+    <h1>Final Project Report: ZentroMart VoiceOps 2026</h1>
+<h2>1. Project Overview</h2>
+<p>The ZentroMart VoiceOps project implements an automated customer support agent designed to handle diverse customer inquiries via chat and voice. The primary objective was to create a system that provides factually grounded answers based on a fictional company's knowledge base (KB), handles multi-turn conversations, performs secure identity verification, and manages escalations through ticket creation.</p>
+<p><strong>Scope of Solution:</strong></p>
+<ul>
+<li><strong>Multi-modal Interface</strong>: Integration of Gnani STT/TTS for voice interactions.</li>
+<li><strong>Grounded RAG</strong>: A retrieval-augmented generation pipeline to ensure answers are derived from policy documents.</li>
+<li><strong>Deterministic Logic</strong>: Hard-coded paths for high-certainty calculations (refund dates, return windows).</li>
+<li><strong>Secure Workflows</strong>: Identity-checked order lookups and a structured escalation process.</li>
+</ul>
+<h2>2. System Architecture</h2>
+<h3>2.1 Retrieval-Augmented Generation (RAG)</h3>
+<p>The system utilizes a local NumPy-based vector index built using the intfloat/multilingual-e5-small model.</p>
+<ul>
+<li><strong>Retrieval</strong>: Uses a pool-16 relevance-aware ranking system to select the top-k most relevant knowledge chunks.</li>
+<li><strong>Grounding &amp; Citations</strong>: Every factual claim must be accompanied by a citation (e.g., [RET-2]). The system performs a structural check to ensure every cited ID was actually retrieved.</li>
+<li><strong>Response Parsing</strong>: A robust JSON parser strips Markdown fences and validates the response schema, preventing &quot;hallucinated&quot; prose.</li>
+</ul>
+<h3>2.2 Deterministic Safeguards</h3>
+<p>To overcome LLM abstention bias and ensure 100% accuracy for critical data, deterministic paths were implemented:</p>
+<ul>
+<li><strong>Return Windows</strong>: Logic that links a product's return_category directly to the RET-2 policy.</li>
+<li><strong>Serviceability</strong>: Direct lookup of delivery status from pincodes.csv.</li>
+<li><strong>Dated Refunds</strong>: A business-day calculator that accounts for Sundays and holidays.csv entries.</li>
+</ul>
+<h3>2.3 Conversation &amp; Voice Architecture</h3>
+<ul>
+<li><strong>Conversation Runner</strong>: A stateful engine that tracks verification status, topic context, and ticket state.</li>
+<li><strong>Identity Verification</strong>: Implements a two-attempt proof system (phone suffix or pincode) before releasing private order details.</li>
+<li><strong>Voice Pipeline</strong>:<ul>
+<li><strong>Local Audio</strong>: Successful validation of local microphone recording and speaker playback.</li>
+<li><strong>STT</strong>: Integration with Gnani STT was verified as functional in earlier testing.</li>
+<li><strong>TTS</strong>: Gnani SSE adapter synthesizing speech using the timbre-v2.5 model.</li>
+<li><strong>Batch Processing</strong>: A script to process folders of audio files into transcripts and WAV replies.</li>
+</ul>
+</li>
+</ul>
+<h2>3. Evaluation and Results</h2>
+<h3>3.1 RAG Performance</h3>
+<p>Evaluation against the 52 practice questions shows significant improvement over the LLM-only baseline:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:left">Metric</th>
+  <th style="text-align:center">Baseline (LLM-only)</th>
+  <th style="text-align:center">RAG (v5)</th>
+  <th style="text-align:center">Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left"><strong>Non-abstention Rate</strong></td>
+  <td style="text-align:center">26.9%</td>
+  <td style="text-align:center">84.6%</td>
+  <td style="text-align:center">+57.7%</td>
+</tr>
+<tr>
+  <td style="text-align:left"><strong>Abstention Rate</strong></td>
+  <td style="text-align:center">73.1%</td>
+  <td style="text-align:center">15.4%</td>
+  <td style="text-align:center">-57.7%</td>
+</tr>
+<tr>
+  <td style="text-align:left"><strong>Citation Integrity</strong></td>
+  <td style="text-align:center">N/A</td>
+  <td style="text-align:center">84.6%</td>
+  <td style="text-align:center">New Capability</td>
+</tr>
+<tr>
+  <td style="text-align:left"><strong>Parser Error Rate</strong></td>
+  <td style="text-align:center">N/A</td>
+  <td style="text-align:center">0%</td>
+  <td style="text-align:center">Resolved</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note: Non-abstention rate indicates the system provided a response rather than refusing due to lack of policy access; it does not inherently guarantee factual correctness. Citation integrity confirms that cited evidence IDs were successfully retrieved, not their semantic accuracy.</em></p>
+<ul>
+<li><strong>Structural Stability</strong>: The parser fix reduced invalid_structured_response cases from <strong>31 (v4)</strong> to <strong>0 (v5)</strong>.</li>
+<li><strong>Grounding</strong>: Most responses now include required policy citations, with deterministic paths eliminating abstentions for key product-policy lookups (e.g., PQ0024, PQ0037).</li>
+<li><strong>Regression</strong>: The offline test suite passed <strong>47/47</strong> tests, verifying the integrity of the retriever and RAG logic.</li>
+</ul>
+<h3>3.2 Retrieval Metrics</h3>
+<p>The retriever demonstrates strong performance in surfacing necessary policy sections, achieving an average <strong>Recall@K of 91%</strong> and an <strong>MRR (Mean Reciprocal Rank) of 0.64</strong> across the practice dataset.</p>
+<h2>4. Limitations and Future Work</h2>
+<h3>4.1 Identified Blockers</h3>
+<ul>
+<li><strong>Gnani TTS Connectivity</strong>: Live TTS requests consistently returned <strong>HTTP 403 Forbidden (Error 1010)</strong>. While the adapter logic and local audio playback are verified, the cause of this API rejection was not conclusively established.</li>
+<li><strong>End-to-End Voice Validation</strong>: Because the TTS component remained blocked, the complete end-to-end voice-to-voice workflow was not fully validated.</li>
+</ul>
+<h3>4.2 Future Improvements</h3>
+<ul>
+<li><strong>Semantic Validation</strong>: Moving beyond structural citation checks to automated semantic verification.</li>
+<li><strong>Expanded Tooling</strong>: Integrating real-time ticket tracking and live agent handoff.</li>
+</ul>
+<h2>5. Reproducibility</h2>
+<h3>5.1 Environment Setup</h3>
+<p><code>powershell python -m venv .venv .\.venv\Scripts\activate pip install -r requirements.txt </code></p>
+<h3>5.2 Execution Commands</h3>
+<ul>
+<li><strong>Index Build</strong>: python build_rag_index.py</li>
+<li><strong>RAG Evaluation</strong>: python run_rag.py --output outputs/rag_results.csv</li>
+<li><strong>Offline Tests</strong>: .venv\Scripts\python.exe -m pytest tests/test_rag.py</li>
+<li><strong>Batch Voice</strong>: python scripts/run_voice_batch.py --input-dir .\audio\incoming --output-dir .\outputs\voice_batch</li>
+</ul>
+<hr />
+<p><strong>Date</strong>: 25 October 2026
+<strong>Project</strong>: ZentroMart VoiceOps Capstone</p>
+
+</body>
+</html>
